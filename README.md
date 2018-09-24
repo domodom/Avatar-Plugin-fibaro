@@ -25,6 +25,6 @@ Dans le fichier fibaro.prop
 
 Version 1.0 (24-09-2018)
 
-[x] Allumer / Eteindre un module 
-[x] Demander le statut d'un module
+- [x] Allumer / Eteindre un module 
+- [x] Demander le statut d'un module
 
