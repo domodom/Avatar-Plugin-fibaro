@@ -1,0 +1,20 @@
+{
+  "modules": {
+    "fibaro": {
+      "description": "Commandes Vocales pour controler votre FIBARO HomeCenter 2",
+      "version": "1.1.0",
+      "ip": "192.168.137.201",
+      "port": 80,
+      "user": "Eddy",
+      "password": "BObo2Kq9@",
+      "info": true,
+      "rules": {
+        "turn_on": [ "turn on * ", "light up * ", "switch on * ", "open", "lights *" ],
+        "turn_off": [ "turn off * ", "light up * ", "switch off * ", "close * " ],
+        "weather": [ "weather" ],
+        "status" : [ "give? the? status" ],
+        "run_scene": [ "execute scene " ]
+      }
+    }
+  }
+}
