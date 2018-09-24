@@ -7,7 +7,7 @@
 
 **EX :**
 
-- Allume la lumère du salon
+- Allume la lumière du salon
 - Eteint la cafetière de la cuisine
 - Ferme les volets de la chambre.
 
