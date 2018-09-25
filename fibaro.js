@@ -374,21 +374,9 @@ var speakBaseType = function(module, rooms, client) {
 var speakType = function(module, rooms, client) {
   switch (module.type) {
     case 'com.fibaro.FGR221':
-      if (data_value == 'true') {
-        Avatar.speak(module.name + " " + rooms.name + ' allumée', client, function() {
+        Avatar.speak(module.name + " " + rooms.name + (module.properties.value == '0' ? ' fermé' : ' ouvert '), client, function() {
           Avatar.Speech.end(client);
         });
-      }
-      if (data_value == 'false') {
-        Avatar.speak(module.name + " " + rooms.name + ' éteinte', client, function() {
-          Avatar.Speech.end(client);
-        });
-      }
-      if (data_value == '') {
-        Avatar.speak(module.name + " " + rooms.name + (module.properties.value == '0' ? ' éteinte' : ' allumée '), client, function() {
-          Avatar.Speech.end(client);
-        });
-      }
       break;
     case 'virtual_device':
       break;
