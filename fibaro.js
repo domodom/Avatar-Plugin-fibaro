@@ -350,17 +350,17 @@ var speakBaseType = function(module, rooms, client) {
       });
       break;
     case 'com.fibaro.motionSensor':
-    Avatar.speak(module.properties.value == '0' ? ' pas de mouvements sur ' : ' detection présence sur') + module.name + ' ' + rooms.name), client, function() {
+    Avatar.speak((module.properties.value == '0' ? ' pas de mouvements sur ' : ' detection présence sur') + module.name, client, function() {
       Avatar.Speech.end(client);
     });
       break;
     case 'com.fibaro.seismometer':
-    Avatar.speak('la valeur du ' + module.name + ' est de ' + module.properties.value + get_unit(module)), client, function() {
+    Avatar.speak('la valeur du ' + module.name + ' est de ' + module.properties.value + get_unit(module), client, function() {
       Avatar.Speech.end(client);
     });
       break;
     case 'virtual_device':
-    Avatar.speak('Pas de données pour le moment ...'), client, function() {
+    Avatar.speak('Pas de données pour le moment ...', client, function() {
       Avatar.Speech.end(client);
     });
       break;
@@ -375,17 +375,17 @@ var speakType = function(module, rooms, client) {
   switch (module.type) {
     case 'com.fibaro.FGR221':
       if (data_value == 'true') {
-        Avatar.speak(module.name + " " + rooms.name + ' ouvert', client, function() {
+        Avatar.speak(module.name + " " + rooms.name + ' allumée', client, function() {
           Avatar.Speech.end(client);
         });
       }
       if (data_value == 'false') {
-        Avatar.speak(module.name + " " + rooms.name + ' fermé', client, function() {
+        Avatar.speak(module.name + " " + rooms.name + ' éteinte', client, function() {
           Avatar.Speech.end(client);
         });
       }
       if (data_value == '') {
-        Avatar.speak(module.name + " " + rooms.name + (module.properties.value == '0' ? ' fermé' : ' ouvert '), client, function() {
+        Avatar.speak(module.name + " " + rooms.name + (module.properties.value == '0' ? ' éteinte' : ' allumée '), client, function() {
           Avatar.Speech.end(client);
         });
       }
