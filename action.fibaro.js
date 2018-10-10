@@ -14,8 +14,8 @@ exports.default = function(state) {
 
       var turn_on = ["allume", "ouvre"];
       var turn_off = ["éteins", "éteint", "ferme", "coupe"];
-      var turn_state = ["statut", "valeur"];
-      var piece = ["salon","chambre","cuisine","sdb","couloir"];
+      var turn_state = ["statut", "valeur", "météo"];
+      var piece = ["salon", "chambre", "cuisine", "sdb", "couloir"];
 
       for (var i = 0; i < turn_on.length; i++) {
          if (state.rawSentence.indexOf(turn_on[i]) != -1 ) {
@@ -39,21 +39,9 @@ exports.default = function(state) {
       for (var i = 0; i < piece.length; i++) {
          if (state.rawSentence.indexOf(piece[i]) != -1 ) {
            req_room = piece[i];
-         };
+         }
       }
       req_module = state.rawSentence.supprimer();
-
-    // Information pour ceux que ca intéresse...
-
-  //   info('***** NLP Relations FIBARO ****'.yellow);
-  //   info('state.tokens:', state.rawSentence);
-  //   info ('Valeur de request : ' + request + " req_value : " + req_value + " req_room : " + req_room + " module : " + req_module);
-  //   info('state.tokens:', state.tokens);
-  //   info('state.tags:', state.tags);
-  //      for (var a in state.relations) {
-  //   info('Relations', a, ":", state.relations[a])
-  //      }
-  //   info('********** END *********'.yellow);
 
     /* pour la pièce en multiroom */
     var room = Avatar.ia.clientFromRule(state.rawSentence);

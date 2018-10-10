@@ -8,23 +8,26 @@
  */
 
 var status;
+var debug;
 var data_request, data_module, data_room, data_value;
+
 exports.init = function() {
-  fibaro = status();
+  status();
 }
 
 exports.action = function(data, callback) {
-  var sentence = data.action.sentence;
-  var client = setClient(data);
+  let sentence = data.action.sentence;
+  let client = data.client;
+      debug = Config.modules.fibaro.debug;
 
   data_request = data.action.request;
   data_module = data.action.req_module;
   data_room = data.action.req_room;
   data_value = data.action.req_value;
 
-  if (data_room == "") data_room = client;
+  if (!data_room) data_room = data.client.toLowerCase();
 
-  if (Config.modules.fibaro.info == true) info(' FIBARO - Module : ' + data_module + ' Pièce : ' + data_room);
+  if (debug) info('FIBARO - Module: ' + data_module + ' Pièce: ' + data_room);
   var tblCommand = {
     turn_on: function() {
       get_rooms(data_request, data, callback, client);
@@ -35,13 +38,22 @@ exports.action = function(data, callback) {
     status: function() {
       get_rooms(data_request, data, callback, client);
     },
-    run_scene: function() {
-      get_rooms(data_request, data, callback, client);
+    weaather: function() {
+        get_weather(data_request, data, callback, client);
+    },
+      // Pour
+    wakeup: function(){
+        data_request = "set";
+        data_module = "cafetière";
+        data_room = "cuisine";
+        data_value = "true";
+        if (debug) info('FIBARO - Module: ' + data_module + ' Pièce: ' + data_room);
+        get_rooms(data_request, data, callback, client);
     }
 
   }
 
-  info("FIBARO Command : ", data.action.command.yellow, " From : ", data.client.yellow, " To : ", client.yellow);
+  info("FIBARO v " + Config.modules.fibaro.version, data.action.command, " From: ", data.client, " To: ", client);
   tblCommand[data.action.command]();
   callback();
 }
@@ -73,6 +85,7 @@ var get_rooms = function(action, data, callback, client) {
   });
 
 }
+
 
 // Fonction activation module
 var get_modules = function(jsonrooms, action, data, client) {
@@ -129,6 +142,34 @@ var get_scenes = function(jsonrooms, json, action, data, client) {
   });
 }
 
+// Fonction récupére météo
+var get_weather = function(action, data, callback, client) {
+    var http = require('http');
+    var options = {
+        hostname: Config.modules.fibaro.ip,
+        port: Config.modules.fibaro.port,
+        path: '/api/rooms',
+        auth: Config.modules.fibaro.user + ':' + Config.modules.fibaro.password
+    };
+
+    http.get(options, function(res) {
+        var buffer = '';
+        res.on('data', function(chunk) {
+            buffer += chunk;
+        });
+
+        res.on('end', function() {
+            var jsonweather = JSON.parse(buffer);
+            info ('** WEATHER : ' + jsonweather);
+        });
+    }).on('error', function(e) {
+        Avatar.speak('Une erreur s\'est produite !', client, function() {
+            Avatar.Speech.end(client);
+        });
+    });
+
+}
+
 // Fonction get (récupération d'information)
 var get = function(jsonrooms, json, data, client) {
   for (var i = 0; i < jsonrooms.length; i++) {
@@ -149,7 +190,7 @@ var get = function(jsonrooms, json, data, client) {
             found = new RegExp(tokens[j], 'i').test(data_module);
           }
 
-          if (Config.modules.fibaro.info == true) info(" Modules trouvés : " + module.name);
+          if (debug) info(" Modules trouvés : " + module.name);
           if (found) {
             return speakBaseType(module, client);
           } else {
@@ -172,7 +213,7 @@ var set = function(jsonrooms, json, data, client) {
       found = new RegExp(tokens[j], 'i').test(data_room);
     }
 
-    if (Config.modules.fibaro.info == true) info("Pièces trouvées : " + rooms.name + ": " + found);
+    if (debug) info("Pièces trouvées : " + rooms.name + ": " + found);
     if (found) {
       for (var i = 0; i < json.length; i++) {
         var module = json[i];
@@ -192,7 +233,7 @@ var set = function(jsonrooms, json, data, client) {
                 auth: Config.modules.fibaro.user + ':' + Config.modules.fibaro.password
               };
             } else {
-              if (Config.modules.fibaro.info == true) info('Exécuter scene');
+              if (debug) info('Exécuter scene');
               var http = require('http');
               var options = {
                 hostname: Config.modules.fibaro.ip,
@@ -226,7 +267,7 @@ var set = function(jsonrooms, json, data, client) {
     }
   }
 
-  if (Config.modules.fibaro.info == true) info('Je n\'ai rien trouvé !');
+  if (debug) info('Je n\'ai rien trouvé !');
   Avatar.speak('Je n\'ai pas pu éxécuter cette action ! ', client, function() {
     Avatar.Speech.end(client);
   });
@@ -350,7 +391,7 @@ var speakBaseType = function(module, rooms, client) {
       });
       break;
     case 'com.fibaro.motionSensor':
-    Avatar.speak((module.properties.value == '0' ? ' pas de mouvements sur ' : ' detection présence sur') + module.name, client, function() {
+    Avatar.speak((module.properties.value == '0' ? ' pas de mouvements sur ' : ' detection présence sur') + module.name + ' ' + rooms.name, client, function() {
       Avatar.Speech.end(client);
     });
       break;
@@ -374,9 +415,21 @@ var speakBaseType = function(module, rooms, client) {
 var speakType = function(module, rooms, client) {
   switch (module.type) {
     case 'com.fibaro.FGR221':
+      if (data_value == 'true') {
+        Avatar.speak(module.name + " " + rooms.name + ' ouvert', client, function() {
+          Avatar.Speech.end(client);
+        });
+      }
+      if (data_value == 'false') {
+        Avatar.speak(module.name + " " + rooms.name + ' fermé', client, function() {
+          Avatar.Speech.end(client);
+        });
+      }
+      if (data_value == '') {
         Avatar.speak(module.name + " " + rooms.name + (module.properties.value == '0' ? ' fermé' : ' ouvert '), client, function() {
           Avatar.Speech.end(client);
         });
+      }
       break;
     case 'virtual_device':
       break;
@@ -401,11 +454,11 @@ var status = function() {
     res.on('data', function(chunk) {});
     res.on('end', function() {
       status = 'En ligne';
-      if (Config.modules.fibaro.info == true) info("Fibaro HomeCenter 2 : " + status);
+      if (debug) info("Fibaro HomeCenter 2 : " + status);
     });
   }).on('error', function(e) {
     status = 'Hors ligne';
-    if (Config.modules.fibaro.info == true) info("Fibaro HomeCenter 2 : " + status);
+    if (debug) info("Fibaro HomeCenter 2 : " + status);
   });
   return status;
 }
