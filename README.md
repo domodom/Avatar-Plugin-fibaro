@@ -19,9 +19,20 @@ Dans le fichier fibaro.prop
       "port": 80,
       "user": "USER",
       "password": "PASSWORD",
-		
+	
+	  "node":{
+	  "displayNode":true ou false 			(Permet d'afficher une icône sur l'interface du serveur correspondant au module de votre hc2)
+	  "delNodeAfterCommand":true ou false   (Efface l'icone de l'interface du serveur après une commande de fermeture ou extinction)
+	},	
 		
 **Version :**
+
+Version 1.3 (10-04-2019)
+
+- [x] Selon paramètre ajout d'un node par module sur le serveur.
+- [x] Selon paramètre lors de la fermeture supprime le node (module)
+- [x] l'icône du module est celui paramètré dans votre homecenter :)
+- [x] Chaque modules affichés à un menu contextuel pour commander l'appareil correspondant.
 
 Version 1.0 (24-09-2018)
 

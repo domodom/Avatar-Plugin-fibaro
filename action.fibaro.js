@@ -15,7 +15,7 @@ exports.default = function(state) {
       var turn_on = ["allume", "ouvre"];
       var turn_off = ["éteins", "éteint", "ferme", "coupe"];
       var turn_state = ["statut", "valeur", "météo"];
-      var piece = ["salon", "chambre", "cuisine", "sdb", "couloir"];
+      var piece = ["salon", "chambre", "cuisine", "sdb", "couloir", "bureau"];
 
       for (var i = 0; i < turn_on.length; i++) {
          if (state.rawSentence.indexOf(turn_on[i]) != -1 ) {
@@ -41,7 +41,7 @@ exports.default = function(state) {
            req_room = piece[i];
          }
       }
-      req_module = state.rawSentence.supprimer();
+      req_module = state.rawSentence.supprimer().reformat();
 
     /* pour la pièce en multiroom */
     var room = Avatar.ia.clientFromRule(state.rawSentence);
@@ -70,12 +70,34 @@ exports.default = function(state) {
 };
 
 String.prototype.supprimer = function () {
-    var TERM = ["allume", "ouvre", "éteins", "éteint", "ferme", "donne", "le", "la", "du", "de", "coupe", "statut", "valeur", "salon", "chambre", "cuisine", "sdb","couloir" ];
+    var TERM = ["allume", "allumer", "ouvre", "ouvrir", "éteins", "éteint", "éteindre", "ferme", "donne", "le", "la", "du", "de", "coupe", "statut", "valeur", "salon", "bureau", "chambre", "cuisine", "sdb","couloir" ];
     var str = this;
     for (var i = 0; i < TERM.length; i++) {
-        var reg= new RegExp(TERM[i], "gi");
+        var reg= new RegExp(TERM[i], "i");
       //  var reg = new RegExp('\\b' + TERM[i] + '\\b\\s?');
         str = str.replace(reg, "").replace(':', '').trim();
     }
+    return str;
+};
+
+String.prototype.reformat = function(){
+    var accent = [
+        /[\300-\306]/g, /[\340-\346]/g, // A, a
+        /[\310-\313]/g, /[\350-\353]/g, // E, e
+        /[\314-\317]/g, /[\354-\357]/g, // I, i
+        /[\322-\330]/g, /[\362-\370]/g, // O, o
+        /[\331-\334]/g, /[\371-\374]/g, // U, u
+        /[\321]/g, /[\361]/g, // N, n
+        /[\307]/g, /[\347]/g, // C, c
+        / /g, /'/g,
+        /"/g
+    ];
+    var noaccent = ['A','a','E','e','I','i','O','o','U','u','N','n','C','c','_','_','_'];
+
+    var str = this;
+    for(var i = 0; i < accent.length; i++){
+        str = str.replace(accent[i], noaccent[i]);
+    }
+
     return str;
 };
