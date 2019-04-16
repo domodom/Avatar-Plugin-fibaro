@@ -1,5 +1,5 @@
 - Pilotez la box FIBARO HomeCenter 2 - 
 
-- Controlez vos modules
+- Contrôlez vos modules
  (Ouverture - Fermeture)
-- Affichage d'une ic�ne sur l'interface Serveur avec controle du module !
+- Affichage d'une icône sur l'interface Serveur avec contrôle du module !
