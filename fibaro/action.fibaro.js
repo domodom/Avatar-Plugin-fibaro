@@ -20,13 +20,13 @@ exports.default = function(state) {
       for (var i = 0; i < turn_on.length; i++) {
          if (state.rawSentence.indexOf(turn_on[i]) != -1 ) {
            request = "set";
-           req_value = "true";
+           req_value = true;
          };
       }
       for (var i = 0; i < turn_off.length; i++) {
          if (state.rawSentence.indexOf(turn_off[i]) != -1 ) {
            request = "set";
-           req_value = "false";
+           req_value = false;
          };
       }
       for (var i = 0; i < turn_state.length; i++) {

@@ -7,7 +7,7 @@
  ************************************************************
  */
 
-var status,
+let status,
     debug,
     cyto,
     google_assistant,
@@ -17,7 +17,7 @@ var status,
     data_request,
     data_module,
     data_room,
-    data_value,
+    data_set,
     data_enabled,
     module_data;
 
@@ -28,7 +28,7 @@ const fs = require('fs-extra');
 const nodeType = "fibaro";
 
 exports.init = function() {
-    status();
+    get_status();
 };
 
 exports.addPluginElements = function(CY) {
@@ -80,7 +80,7 @@ exports.action = function(data, callback) {
       data_request = data.action.request;
       data_module = data.action.req_module;
       data_room = data.action.req_room;
-      data_value = data.action.req_value;
+      data_set = data.action.req_value;
       data_enabled = data.action.req_enabled;
 
 
@@ -104,7 +104,7 @@ exports.action = function(data, callback) {
         data_request = "set";
         data_module = Config.modules.fibaro.reveil.module;
         data_room = Config.modules.fibaro.reveil.room;
-        data_value = Config.modules.fibaro.reveil.open;
+        data_set = Config.modules.fibaro.reveil.open;
         get_rooms(data_request, data, callback, client);
     }
 
@@ -329,7 +329,7 @@ let iconeName = 'pc' ;
               var options = {
                 hostname: Config.modules.fibaro.ip,
                 port: Config.modules.fibaro.port,
-                path: '/api/callAction?deviceID=' + module.id + "&name=" + get_value(module, data_value),
+                path: '/api/callAction?deviceID=' + module.id + "&name=" + get_value(module, data_set),
                 auth: Config.modules.fibaro.user + ':' + Config.modules.fibaro.password
               };
             } else {
@@ -350,7 +350,7 @@ let iconeName = 'pc' ;
               });
 
               res.on('end', function() {
-                module_data = { "name": module.name, "room": rooms.name, "icone": iconeName, "set": data_value } ;
+                module_data = { "name": module.name, "room": rooms.name, "icone": iconeName, "set": data_set } ;
                   addFibaroGraph(module_data);
                 setTimeout((function() {
                   speakType(module, rooms, client);
@@ -372,15 +372,15 @@ let iconeName = 'pc' ;
   if (debug) info('Je n\'ai pas trouvé de module correspondant dans la HomeCenter.');
 
 // Si activé dans la configuration, je passe la commande aux plugins
-  if (smartlife == true){
+  if (smartlife){
     info('La commande à été envoyée au plugin SmartLife');
-    Avatar.trigger('smartlife', { module: data_module, setmod: data_value, enabled: data_enabled, client: client });
+    Avatar.trigger('smartlife', { module: data_module, room: data_room, set: data_set, client: client });
   }
-  if (sonoff == true){
+  if (sonoff){
     info('La commande à été envoyée au plugin SonOff');
-    Avatar.trigger('sonoff', { module: data_module, setmod: data_value, room: data_room, client: client });
+    Avatar.trigger('sonoff', { module: data_module, room: data_room, set: data_set, client: client });
   }
-  if (google_assistant == true) {
+  if (google_assistant) {
       info('La commande à été envoyée au plugin Google-Assistant');
       Avatar.trigger('GoogleHome',{ client: data.client, sentence: sentence, callback: function (response, continueConversation) {
               if (response) {
@@ -403,52 +403,52 @@ let iconeName = 'pc' ;
 var get_value = function(module, value) {
   switch (module.type) {
     case 'com.fibaro.binarySwitch':
-      return (value == 'false' ? 'turnOff' : 'turnOn');
+      return (value == false ? 'turnOff' : 'turnOn');
       break;
     case 'com.fibaro.multilevelSwitch':
       if (value == 'true' || value == 'false') {
-        return (value == 'false' ? 0 : 99);
+        return (value == false ? 0 : 99);
       } else {
         return value;
         break;
       }
     case 'com.fibaro.rollerShutter':
       if (value == 'true' || value == 'false') {
-        return (value == 'false' ? 0 : 99);
+        return (value == false ? 0 : 99);
       } else {
         return value;
         break;
       }
     case 'com.fibaro.motionSensor':
-      return (value == 'false' ? 0 : 1);
+      return (value == false ? 0 : 1);
       break;
 
     case 'com.fibaro.FGS211':
-      return (value == 'false' ? 0 : 1);
+      return (value == false ? 0 : 1);
       break;
     case 'com.fibaro.FGK101':
-      return (value == 'false' ? 0 : 1);
+      return (value == false ? 0 : 1);
       break;
     case 'com.fibaro.FGS221':
-      return (value == 'false' ? 0 : 1);
+      return (value == false ? 0 : 1);
       break;
     case 'com.fibaro.FGD211':
-      if (value == 'true' || value == 'false') {
-        return (value == 'false' ? 0 : 99);
+      if (value == true || value == false) {
+        return (value == false ? 0 : 99);
       } else {
         return value;
         break;
       }
     case 'com.fibaro.FGR221':
-      if (value == 'true' || value == 'false') {
-        return (value == 'false' ? 'turnOff' : 'turnOn');
+      if (value == true || value == false) {
+        return (value == false ? 'turnOff' : 'turnOn');
       } else {
         return value;
         break;
       }
     case 'com.fibaro.FGWPE101':
-      if (value == 'true' || value == 'false') {
-        return (value == 'false' ? 0 : 1);
+      if (value == true || value == false) {
+        return (value == false ? 0 : 1);
       } else {
         return value;
         break;
@@ -485,7 +485,7 @@ var speakType = function(module, rooms, client) {
       });
       break;
     case 'com.fibaro.binarySwitch':
-      var str = module.name + " est " + (data_value == 'false' ? ' éteint' : ' allumé');
+      var str = module.name + " est " + (data_set == false ? ' éteint' : ' allumé');
       if (module.properties.valueSensor && module.properties.valueSensor != "") str += ' et la consommation est de ' + returnString(module.properties.valueSensor, ".", ",") + get_unit(module);
       Avatar.speak(str, client, function() {
         Avatar.Speech.end(client);
@@ -544,7 +544,7 @@ var speakType = function(module, rooms, client) {
 
 
 // INFORMATION SUR LE STATUT DE LA HOMECENTER
-var status = function() {
+var get_status = function() {
   var http = require('http');
   var options = {
     hostname: Config.modules.fibaro.ip,
@@ -591,7 +591,7 @@ function addFibaroGraph(module_data) {
 
 cyto.removeGraphElementByID(id);
 
- if ((Config.modules.fibaro.node.delNodeAfterCommand) && (module_data.set == 'false')) {
+ if ((Config.modules.fibaro.node.delNodeAfterCommand) && (module_data.set == false)) {
    return;
  } else {
               if (fs.existsSync('./resources/core/plugins/fibaro/modules.json')) {
@@ -649,7 +649,7 @@ let id = elem.id();
           icon: 'resources/app/images/icons/activate.png',
           click: () => {
             data_request = 'set';
-            data_value = 'true';
+            data_set = true;
 
             get_rooms(data_request, null, null, Config.default.client);
             mute_Client(Config.default.client);
@@ -659,7 +659,7 @@ let id = elem.id();
           label: 'Eteindre / Fermer',
           icon: 'resources/app/images/icons/desactivate.png',
           click: () => {
-            data_request = 'set'; data_value = 'false';
+            data_request = 'set'; data_set = false;
             get_rooms(data_request, null, null, Config.default.client);
             mute_Client(Config.default.client);
           }
@@ -728,7 +728,7 @@ function saveImageToDisk(iconeName) {
   let fs = require('fs');
   let http = require('http');
 
-  let url = 'http://' + Config.modules.fibaro.ip + ':' + Config.modules.fibaro.port + '/fibaro/icons/'; // + img + '/' + img + '100.png';
+  let url = 'http://' + Config.modules.fibaro.ip + ':' + Config.modules.fibaro.port + '/fibaro/icons/';
   let path = './resources/core/plugins/fibaro/assets/images/modules/'+iconeName+'.png';
 
 if (iconeName.indexOf('User') != -1) {
